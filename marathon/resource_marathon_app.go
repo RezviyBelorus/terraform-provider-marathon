@@ -285,7 +285,7 @@ func resourceMarathonApp() *schema.Resource {
 				Type:     schema.TypeList,
 				Optional: true,
 				ForceNew: false,
-				Elem: &schema.Schema{ Type: schema.TypeString },
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"env": &schema.Schema{
 				Type:     schema.TypeMap,
@@ -381,8 +381,8 @@ func resourceMarathonApp() *schema.Resource {
 							Default:  3,
 							Optional: true,
 						},
-						"delay_seconds" : {
-							Type: schema.TypeInt,
+						"delay_seconds": {
+							Type:     schema.TypeInt,
 							Optional: true,
 						},
 					},
@@ -422,15 +422,15 @@ func resourceMarathonApp() *schema.Resource {
 							Optional: true,
 						},
 						"mode": {
-							Type: schema.TypeString,
-							Required: true,
+							Type:         schema.TypeString,
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"CONTAINER", "CONTAINER/BRIDGE", "HOST"}, false),
 						},
 						"labels": {
-							Type: schema.TypeMap,
+							Type:     schema.TypeMap,
 							Optional: true,
-							Elem: &schema.Schema{Type: schema.TypeString},
-							Set: schema.HashString,
+							Elem:     &schema.Schema{Type: schema.TypeString},
+							Set:      schema.HashString,
 						},
 					},
 				},
@@ -457,8 +457,8 @@ func resourceMarathonApp() *schema.Resource {
 							Optional: true,
 						},
 						"name": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:         schema.TypeString,
+							Optional:     true,
 							ValidateFunc: validation.StringMatch(legacyStringRegexp, "Invalid name"),
 						},
 						"labels": {
@@ -467,6 +467,11 @@ func resourceMarathonApp() *schema.Resource {
 						},
 					},
 				},
+			},
+			"secrets": &schema.Schema{
+				Type:     schema.TypeMap,
+				Optional: true,
+				ForceNew: false,
 			},
 			//"upgrade_strategy": &schema.Schema{
 			//	Type:     schema.TypeList,
@@ -1561,7 +1566,7 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 	//	f := 1.0
 	//	upgradeStrategy.MaximumOverCapacity = &f
 	//}
-    //
+	//
 	//if _, ok := d.GetOk("upgrade_strategy"); ok {
 	//	application.SetUpgradeStrategy(upgradeStrategy)
 	//}
@@ -1598,6 +1603,17 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 	if v, ok := d.GetOk("user"); ok {
 		v := v.(string)
 		application.User = v
+	}
+
+	if v, ok := d.GetOk("secrets"); ok {
+		secretsMap := v.(map[string]interface{})
+		secrets := make(map[string]marathon.Secret, len(secretsMap))
+
+		for k, v := range secretsMap {
+			secrets[k] = marathon.Secret{k, v.(string)}
+		}
+
+		application.Secrets = &secrets
 	}
 
 	return application
