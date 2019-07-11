@@ -1,7 +1,6 @@
 module github.com/rolyv/terraform-provider-marathon
 
 require (
-	github.com/PTC-GLOBAL/dcos-sdk-go v0.0.0-20180215134535-89086b591889 // indirect
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/donovanhide/eventsource v0.0.0-20171031113327-3ed64d21fb0b // indirect
@@ -20,7 +19,6 @@ require (
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
-	github.com/squeakysimple/dcos-sdk-go v0.0.0-20180215134535-89086b591889
 	github.com/zclconf/go-cty v0.0.0-20190212192503-19dda139b164 // indirect
 	golang.org/x/crypto v0.0.0-20190211182817-74369b46fc67 // indirect
 	golang.org/x/net v0.0.0-20190213061140-3a22650c66bd // indirect
