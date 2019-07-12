@@ -3,15 +3,16 @@ package marathon
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gambol99/go-marathon"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
+
+	marathon "github.com/gambol99/go-marathon"
 )
 
 var legacyStringRegexp = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
@@ -111,12 +112,14 @@ func resourceMarathonApp() *schema.Resource {
 			"container": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"docker": &schema.Schema{
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"force_pull_image": {
@@ -414,6 +417,7 @@ func resourceMarathonApp() *schema.Resource {
 			"networks": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -444,6 +448,7 @@ func resourceMarathonApp() *schema.Resource {
 			"port_definitions": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -744,7 +749,7 @@ func setSchemaFieldsForApp(app *marathon.Application, d *schema.ResourceData) er
 		containerMap := make(map[string]interface{})
 		containerMap["type"] = container.Type
 
-		if container.Type == "DOCKER" {
+		if container.Docker != nil {
 			docker := container.Docker
 			dockerMap := make(map[string]interface{})
 			containerMap["docker"] = []interface{}{dockerMap}
@@ -1185,12 +1190,9 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 
 		container.Type = t
 
-		if t == "DOCKER" {
+		if image, dockerOK := d.GetOk("container.0.docker.0.image"); dockerOK {
 			docker := new(marathon.Docker)
-
-			if v, ok := d.GetOk("container.0.docker.0.image"); ok {
-				docker.Image = v.(string)
-			}
+			docker.Image = image.(string)
 
 			if v, ok := d.GetOk("container.0.docker.0.force_pull_image"); ok {
 				value := v.(bool)
