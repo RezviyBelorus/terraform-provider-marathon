@@ -4,7 +4,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/donovanhide/eventsource v0.0.0-20171031113327-3ed64d21fb0b // indirect
-	github.com/gambol99/go-marathon v0.7.2-0.20190107135153-d91676e2390d
+	github.com/gambol99/go-marathon v0.7.2-0.20190514025336-12b125232684
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hashicorp/go-getter v1.0.3 // indirect
 	github.com/hashicorp/go-hclog v0.7.0 // indirect

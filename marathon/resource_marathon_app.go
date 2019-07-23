@@ -161,6 +161,10 @@ func resourceMarathonApp() *schema.Resource {
 										Type:     schema.TypeString,
 										Optional: true,
 									},
+									"secret": {
+										Type:     schema.TypeString,
+										Optional: true,
+									},
 									"host_path": {
 										Type:     schema.TypeString,
 										Optional: true,
@@ -781,6 +785,9 @@ func setSchemaFieldsForApp(app *marathon.Application, d *schema.ResourceData) er
 				volumeMap["host_path"] = volume.HostPath
 				volumeMap["mode"] = volume.Mode
 
+				if container.Type == "MESOS" && volume.Secret != "" {
+					volumeMap["secret"] = volume.Secret
+				}
 				if volume.External != nil {
 					external := make(map[string]interface{})
 					external["name"] = volume.External.Name
@@ -1223,6 +1230,9 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 
 				if val, ok := volumeMap["container_path"]; ok {
 					volumes[i].ContainerPath = val.(string)
+				}
+				if val, ok := volumeMap["secret"]; ok {
+					volumes[i].Secret = val.(string)
 				}
 				if val, ok := volumeMap["host_path"]; ok {
 					volumes[i].HostPath = val.(string)
