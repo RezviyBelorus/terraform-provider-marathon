@@ -28,6 +28,8 @@ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5Kwzbycv
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/gambol99/go-marathon v0.7.2-0.20190107135153-d91676e2390d h1:UZ6nOZKptcX9wzAhYULiMMtVWA6lzryyrh2DxR12jnY=
 github.com/gambol99/go-marathon v0.7.2-0.20190107135153-d91676e2390d/go.mod h1:GLyXJD41gBO/NPKVPGQbhyyC06eugGy15QEZyUkE2/s=
+github.com/gambol99/go-marathon v0.7.2-0.20190514025336-12b125232684 h1:/Z02BE0K8m+9nNly4ZK8sGfi+Vf5kpMOLGa7jFwaolY=
+github.com/gambol99/go-marathon v0.7.2-0.20190514025336-12b125232684/go.mod h1:GLyXJD41gBO/NPKVPGQbhyyC06eugGy15QEZyUkE2/s=
 github.com/go-test/deep v1.0.1 h1:UQhStjbkDClarlmv0am7OXXO4/GaPdCGiUiMTvi28sg=
 github.com/go-test/deep v1.0.1/go.mod h1:wGDj63lr65AM2AQyKZd/NYHGb0R+1RLqB8NKt3aSFNA=
 github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b h1:VKtxabqXZkF25pY9ekfRL6a582T4P37/31XEstQ5p58=
