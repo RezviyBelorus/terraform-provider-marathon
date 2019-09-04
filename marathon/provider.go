@@ -1,6 +1,7 @@
 package marathon
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"time"
@@ -56,6 +57,12 @@ func Provider() terraform.ResourceProvider {
 				Default:     true,
 				Description: "Log output to stdout",
 			},
+			"insecure": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable insecure HTTPS requests",
+			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -68,10 +75,17 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	marathonConfig := marathon.NewDefaultConfig()
+	insecure := d.Get("insecure").(bool)
 
 	marathonConfig.URL = d.Get("url").(string)
 	marathonConfig.HTTPClient = &http.Client{
 		Timeout: time.Duration(d.Get("request_timeout").(int)) * time.Second,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: insecure,
+			},
+		},
 	}
 
 	marathonConfig.HTTPBasicAuthUser = d.Get("basic_auth_user").(string)
@@ -84,9 +98,22 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	marathonConfig.HTTPClient = &http.Client{
 		Timeout: time.Duration(d.Get("deployment_timeout").(int)) * time.Second,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: insecure,
+			},
+		},
 	}
 
-	marathonConfig.HTTPSSEClient = &http.Client{}
+	marathonConfig.HTTPSSEClient = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: insecure,
+			},
+		},
+	}
 
 	config := config{
 		config:                   marathonConfig,
