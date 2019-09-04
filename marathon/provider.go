@@ -57,6 +57,12 @@ func Provider() terraform.ResourceProvider {
 				Default:     true,
 				Description: "Log output to stdout",
 			},
+			"insecure": &schema.Schema{
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Enable insecure HTTPS requests",
+			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -69,6 +75,7 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	marathonConfig := marathon.NewDefaultConfig()
+	insecure := d.Get("insecure").(bool)
 
 	marathonConfig.URL = d.Get("url").(string)
 	marathonConfig.HTTPClient = &http.Client{
@@ -76,7 +83,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: insecure,
 			},
 		},
 	}
@@ -94,7 +101,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: insecure,
 			},
 		},
 	}
@@ -103,7 +110,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		Transport: &http.Transport{
 			Proxy: http.ProxyFromEnvironment,
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+				InsecureSkipVerify: insecure,
 			},
 		},
 	}
