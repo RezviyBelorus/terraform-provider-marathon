@@ -1,6 +1,7 @@
 package marathon
 
 import (
+	"crypto/tls"
 	"log"
 	"net/http"
 	"time"
@@ -72,6 +73,12 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	marathonConfig.URL = d.Get("url").(string)
 	marathonConfig.HTTPClient = &http.Client{
 		Timeout: time.Duration(d.Get("request_timeout").(int)) * time.Second,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
 	}
 
 	marathonConfig.HTTPBasicAuthUser = d.Get("basic_auth_user").(string)
@@ -84,9 +91,22 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 
 	marathonConfig.HTTPClient = &http.Client{
 		Timeout: time.Duration(d.Get("deployment_timeout").(int)) * time.Second,
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
 	}
 
-	marathonConfig.HTTPSSEClient = &http.Client{}
+	marathonConfig.HTTPSSEClient = &http.Client{
+		Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		},
+	}
 
 	config := config{
 		config:                   marathonConfig,
