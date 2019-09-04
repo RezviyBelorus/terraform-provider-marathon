@@ -3,15 +3,16 @@ package marathon
 import (
 	"errors"
 	"fmt"
-	"github.com/hashicorp/terraform/helper/validation"
 	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gambol99/go-marathon"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
+
+	marathon "github.com/gambol99/go-marathon"
 )
 
 var legacyStringRegexp = regexp.MustCompile(`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`)
@@ -111,12 +112,14 @@ func resourceMarathonApp() *schema.Resource {
 			"container": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"docker": &schema.Schema{
 							Type:     schema.TypeList,
 							Optional: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"force_pull_image": {
@@ -414,6 +417,7 @@ func resourceMarathonApp() *schema.Resource {
 			"networks": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -444,6 +448,7 @@ func resourceMarathonApp() *schema.Resource {
 			"port_definitions": &schema.Schema{
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				ForceNew: false,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -473,44 +478,44 @@ func resourceMarathonApp() *schema.Resource {
 				Optional: true,
 				ForceNew: false,
 			},
-			//"upgrade_strategy": &schema.Schema{
-			//	Type:     schema.TypeList,
-			//	Optional: true,
-			//	ForceNew: false,
-			//	Elem: &schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"minimum_health_capacity": {
-			//				Type:     schema.TypeFloat,
-			//				Optional: true,
-			//				Computed: true,
-			//			},
-			//			"maximum_over_capacity": {
-			//				Type:     schema.TypeFloat,
-			//				Optional: true,
-			//				Computed: true,
-			//			},
-			//		},
-			//	},
-			//},
-			//"unreachable_strategy": &schema.Schema{
-			//	Type:     schema.TypeList,
-			//	Optional: true,
-			//	ForceNew: false,
-			//	Elem: &schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"inactive_after_seconds": {
-			//				Type:     schema.TypeInt,
-			//				Optional: true,
-			//				Computed: true,
-			//			},
-			//			"expunge_after_seconds": {
-			//				Type:     schema.TypeInt,
-			//				Optional: true,
-			//				Computed: true,
-			//			},
-			//		},
-			//	},
-			//},
+			"upgrade_strategy": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"minimum_health_capacity": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Computed: true,
+						},
+						"maximum_over_capacity": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
+			"unreachable_strategy": &schema.Schema{
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: false,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"inactive_after_seconds": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+						"expunge_after_seconds": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+						},
+					},
+				},
+			},
 			"kill_selection": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
@@ -744,7 +749,7 @@ func setSchemaFieldsForApp(app *marathon.Application, d *schema.ResourceData) er
 		containerMap := make(map[string]interface{})
 		containerMap["type"] = container.Type
 
-		if container.Type == "DOCKER" {
+		if container.Docker != nil {
 			docker := container.Docker
 			dockerMap := make(map[string]interface{})
 			containerMap["docker"] = []interface{}{dockerMap}
@@ -1006,42 +1011,42 @@ func setSchemaFieldsForApp(app *marathon.Application, d *schema.ResourceData) er
 		d.Set("port_definitions", nil)
 	}
 
-	//if app.UpgradeStrategy != nil {
-	//	usMap := make(map[string]interface{})
-	//	usMap["minimum_health_capacity"] = *app.UpgradeStrategy.MinimumHealthCapacity
-	//	usMap["maximum_over_capacity"] = *app.UpgradeStrategy.MaximumOverCapacity
-	//	err := d.Set("upgrade_strategy", &[]interface{}{usMap})
-	//
-	//	if err != nil {
-	//		return errors.New("Failed to set upgrade_strategy: " + err.Error())
-	//	}
-	//} else {
-	//	d.Set("upgrade_strategy", nil)
-	//}
-	//d.SetPartial("upgrade_strategy")
-	//
-	//if app.UnreachableStrategy != nil {
-	//	unrMap := make(map[string]interface{})
-	//	if app.UnreachableStrategy.InactiveAfterSeconds != nil {
-	//		unrMap["inactive_after_seconds"] = *app.UnreachableStrategy.InactiveAfterSeconds
-	//	} else {
-	//		unrMap["inactive_after_seconds"] = nil
-	//	}
-	//
-	//	if app.UnreachableStrategy.ExpungeAfterSeconds != nil {
-	//		unrMap["expunge_after_seconds"] = *app.UnreachableStrategy.ExpungeAfterSeconds
-	//	} else {
-	//		unrMap["expunge_after_seconds"] = nil
-	//	}
-	//
-	//	err := d.Set("unreachable_strategy", &[]interface{}{unrMap})
-	//	if err != nil {
-	//		return errors.New("Failed to set unreachable_strategy: " + err.Error())
-	//	}
-	//} else {
-	//	d.Set("unreachable_strategy", nil)
-	//}
-	//d.SetPartial("unreachable_strategy")
+	if app.UpgradeStrategy != nil {
+		usMap := make(map[string]interface{})
+		usMap["minimum_health_capacity"] = *app.UpgradeStrategy.MinimumHealthCapacity
+		usMap["maximum_over_capacity"] = *app.UpgradeStrategy.MaximumOverCapacity
+		err := d.Set("upgrade_strategy", &[]interface{}{usMap})
+
+		if err != nil {
+			return errors.New("Failed to set upgrade_strategy: " + err.Error())
+		}
+	} else {
+		d.Set("upgrade_strategy", nil)
+	}
+	d.SetPartial("upgrade_strategy")
+
+	if app.UnreachableStrategy != nil {
+		unrMap := make(map[string]interface{})
+		if app.UnreachableStrategy.InactiveAfterSeconds != nil {
+			unrMap["inactive_after_seconds"] = *app.UnreachableStrategy.InactiveAfterSeconds
+		} else {
+			unrMap["inactive_after_seconds"] = nil
+		}
+
+		if app.UnreachableStrategy.ExpungeAfterSeconds != nil {
+			unrMap["expunge_after_seconds"] = *app.UnreachableStrategy.ExpungeAfterSeconds
+		} else {
+			unrMap["expunge_after_seconds"] = nil
+		}
+
+		err := d.Set("unreachable_strategy", &[]interface{}{unrMap})
+		if err != nil {
+			return errors.New("Failed to set unreachable_strategy: " + err.Error())
+		}
+	} else {
+		d.Set("unreachable_strategy", nil)
+	}
+	d.SetPartial("unreachable_strategy")
 
 	err = d.Set("kill_selection", app.KillSelection)
 	if err != nil {
@@ -1185,12 +1190,9 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 
 		container.Type = t
 
-		if t == "DOCKER" {
+		if image, dockerOK := d.GetOk("container.0.docker.0.image"); dockerOK {
 			docker := new(marathon.Docker)
-
-			if v, ok := d.GetOk("container.0.docker.0.image"); ok {
-				docker.Image = v.(string)
-			}
+			docker.Image = image.(string)
 
 			if v, ok := d.GetOk("container.0.docker.0.force_pull_image"); ok {
 				value := v.(bool)
@@ -1545,55 +1547,55 @@ func mapResourceToApplication(d *schema.ResourceData) *marathon.Application {
 		application.PortDefinitions = &portDefinitions
 	}
 
-	//upgradeStrategy := marathon.UpgradeStrategy{}
-	//
-	//if v, ok := d.GetOkExists("upgrade_strategy.0.minimum_health_capacity"); ok {
-	//	f, ok := v.(float64)
-	//	if ok {
-	//		upgradeStrategy.MinimumHealthCapacity = &f
-	//	}
-	//} else {
-	//	f := 1.0
-	//	upgradeStrategy.MinimumHealthCapacity = &f
-	//}
-	//
-	//if v, ok := d.GetOkExists("upgrade_strategy.0.maximum_over_capacity"); ok {
-	//	f, ok := v.(float64)
-	//	if ok {
-	//		upgradeStrategy.MaximumOverCapacity = &f
-	//	}
-	//} else {
-	//	f := 1.0
-	//	upgradeStrategy.MaximumOverCapacity = &f
-	//}
-	//
-	//if _, ok := d.GetOk("upgrade_strategy"); ok {
-	//	application.SetUpgradeStrategy(upgradeStrategy)
-	//}
-	//
-	//unreachableStrategy := marathon.UnreachableStrategy{}
-	//if v, ok := d.GetOkExists("unreachable_strategy.0.inactive_after_seconds"); ok {
-	//	f, ok := v.(float64)
-	//	if ok {
-	//		unreachableStrategy.InactiveAfterSeconds = &f
-	//	}
-	//}
-	//
-	//if v, ok := d.GetOkExists("unreachable_strategy.0.expunge_after_seconds"); ok {
-	//	f, ok := v.(float64)
-	//	if ok {
-	//		unreachableStrategy.ExpungeAfterSeconds = &f
-	//	}
-	//}
-	//
-	//if v, ok := d.GetOk("unreachable_strategy"); ok {
-	//	switch v.(type) {
-	//	case string:
-	//		application.UnreachableStrategy = nil
-	//	default:
-	//		application.SetUnreachableStrategy(unreachableStrategy)
-	//	}
-	//}
+	upgradeStrategy := marathon.UpgradeStrategy{}
+
+	if v, ok := d.GetOkExists("upgrade_strategy.0.minimum_health_capacity"); ok {
+		f, ok := v.(float64)
+		if ok {
+			upgradeStrategy.MinimumHealthCapacity = &f
+		}
+	} else {
+		f := 1.0
+		upgradeStrategy.MinimumHealthCapacity = &f
+	}
+
+	if v, ok := d.GetOkExists("upgrade_strategy.0.maximum_over_capacity"); ok {
+		f, ok := v.(float64)
+		if ok {
+			upgradeStrategy.MaximumOverCapacity = &f
+		}
+	} else {
+		f := 1.0
+		upgradeStrategy.MaximumOverCapacity = &f
+	}
+
+	if _, ok := d.GetOk("upgrade_strategy"); ok {
+		application.SetUpgradeStrategy(upgradeStrategy)
+	}
+
+	unreachableStrategy := marathon.UnreachableStrategy{}
+	if v, ok := d.GetOkExists("unreachable_strategy.0.inactive_after_seconds"); ok {
+		f, ok := v.(float64)
+		if ok {
+			unreachableStrategy.InactiveAfterSeconds = &f
+		}
+	}
+
+	if v, ok := d.GetOkExists("unreachable_strategy.0.expunge_after_seconds"); ok {
+		f, ok := v.(float64)
+		if ok {
+			unreachableStrategy.ExpungeAfterSeconds = &f
+		}
+	}
+
+	if v, ok := d.GetOk("unreachable_strategy"); ok {
+		switch v.(type) {
+		case string:
+			application.UnreachableStrategy = nil
+		default:
+			application.SetUnreachableStrategy(unreachableStrategy)
+		}
+	}
 
 	if v, ok := d.GetOk("kill_selection"); ok {
 		v := v.(string)
