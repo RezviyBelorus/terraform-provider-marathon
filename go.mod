@@ -1,4 +1,4 @@
-module github.com/rolyv/terraform-provider-marathon
+module github.com/mesosphere/terraform-provider-marathon
 
 require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
